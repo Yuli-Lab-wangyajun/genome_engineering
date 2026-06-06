@@ -1,4 +1,4 @@
-## Extract_gff_features.py Usage Instructions
+## (1) Extract_gff_features.py Usage Instructions
 ### Function: One-click output of 6 BED files (gene, exon, CDS, intron, gene upstream, distal intergenic) from the genome annotation file (gff) downloaded from NCBI.
 ## Usage command
 ```
@@ -15,3 +15,6 @@ Example: python Extract_gff_features.py input.gff -o out --up 2000
 ```
 genome_gene.bed、genome_exon.bed、genome_CDS.bed、genome_intron.bed、genome_upstream2000.bed、genome_distal_intergenic.bed
 ```
+
+## (2) to be continued
+...
