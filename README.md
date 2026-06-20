@@ -25,5 +25,46 @@ usage: python extract_longest_transcript.py -g annotation.gff -f genome.fasta -o
 -o, --output	Yes	Output FASTA file containing the longest transcript sequences
 ```
 
-## (3) to be continued
+## (3) Obtain the ORF from the longest transcript file (Dna2protein.pl and Orf_seq.pl)
+```
+# Change to the working directory
+cd path/test
+
+# 1. Rename sequence headers: replace hyphens with underscores and create a name mapping file
+sed -i.bak '/^>/ s/-/_/g' human_longestTRAN.fa;grep '^>' human_longestTRAN.fa.bak | sed 's/^>//' > old_names.txt;grep '^>' human_longestTRAN.fa | sed 's/^>//' > new_names.txt;paste old_names.txt new_names.txt > Name_align.txt;rm old_names.txt new_names.txt human_longestTRAN.fa.bak
+
+# 2. Create a directory to store individual sequence files. Split the multi‑FASTA file into separate files by sequence name (using UCSC tools)
+mkdir split
+faSplit byname human_longestTRAN.fa split/
+
+# 3. For each input sequence, predict all ORFs (≥120 aa, both strands) using EMBOSS getorf
+raw_file_list=`ls split/`
+mkdir orf
+for file in $raw_file_list
+do
+new_file=${file%.*}
+/work/home/acm2g39zj0/software/EMBOSS-6.5.7/emboss/getorf -sequence split/$file orf/$new_file.orf.fas -find 2 -minsize 120 -reverse
+done
+
+# 4. For each ORF file, extract the single longest ORF (using an external function and a Perl script)
+mkdir orf_longest
+orf_file_list=`ls orf/`
+for orf_file in $orf_file_list
+do
+get_the_longest_orf
+new_orf_file=${orf_file%.*}
+perl $pl_path/Orf_seq.pl -r orf/$orf_file -w orf_longest/$new_orf_file
+done
+
+# 5. Translate the nucleotide ORFs into protein sequences; 
+cd orf_longest
+perl $pl_path/Dna2protein.pl
+
+# 6. Go back, concatenate all protein FASTA files, remove any lines that are just '>', and save as final file
+cd ..
+cat orf_longest/protein_sequence/*.fas | sed '/^>$/d' > human_longestTRAN_protein.orf.all.fa
+
+```
+
+## (4) to be continued
 ...
